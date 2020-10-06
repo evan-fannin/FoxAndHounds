@@ -6,7 +6,7 @@ class FoxAndHounds(gameSearch.Game):
     Include a reference to the exact rules.
     '''
 
-    to_move = 'fox'  # Fox moves first
+    fox_turn = False  # Fox moves first, this is flipped at the start of actions
 
     emptyState = (  # The setup at the beginning of a full game.
                   '.h.h.h.h',
@@ -26,17 +26,19 @@ class FoxAndHounds(gameSearch.Game):
             self.initial = initial
 
     def actions(self, state):
-        if self.to_move(self, state) == 'fox':
-            return self.get_fox_moves(self, state)
+        self.fox_turn = not self.fox_turn
+
+        if self.fox_turn:
+            return self.get_fox_moves(state)
         else:  # It's the hounds' turn
-            return self.get_hounds_moves(self, state)
+            return self.get_hounds_moves(state)
 
     def result(self, state, move):
         board = [[c for c in row]
                  for row in state]
-        player = self.to_move(state)
+        player = self.to_move
 
-        if player == 'fox':
+        if player:
             r0, c0 = self.get_fox(state)
             r1, c1 = move
             board[r0][c0] = '.'
@@ -58,7 +60,7 @@ class FoxAndHounds(gameSearch.Game):
 
     def utility(self, state, player):
         fox_utility = self.fox_utility(state)
-        if player == 'fox':
+        if player:
             return fox_utility
         else:
             return -fox_utility
@@ -71,8 +73,8 @@ class FoxAndHounds(gameSearch.Game):
         return 0
 
     def terminal_test(self, state):
-        fox_wins = self.fox_wins(self, state)
-        hounds_win = self.hounds_win(self, state)
+        fox_wins = self.fox_wins(state)
+        hounds_win = self.hounds_win(state)
 
         if fox_wins or hounds_win:
             return True
@@ -80,12 +82,7 @@ class FoxAndHounds(gameSearch.Game):
         return False
 
     def to_move(self, state):
-        if self.to_move == 'fox':
-            self.to_move = 'hounds'
-            return 'fox'
-        else:
-            self.to_move = 'fox'
-            return 'hounds'
+        return self.fox_turn
 
     def get_fox(self, state):
         for r in range(8):
@@ -97,7 +94,7 @@ class FoxAndHounds(gameSearch.Game):
 
     def get_fox_moves(self, state):
         moves = []
-        r, c = self.get_fox(self, state)
+        r, c = self.get_fox(state)
 
         # Four possible moves: two diagonally above, two diagonally below
 
@@ -110,7 +107,7 @@ class FoxAndHounds(gameSearch.Game):
                     moves.append((r - 1, c - 1))
 
             # Check above right
-            if c + 1 >= 0:
+            if c + 1 <= 7:
                 if state[r - 1][c + 1] == '.':
                     moves.append((r - 1, c + 1))
 
@@ -123,14 +120,14 @@ class FoxAndHounds(gameSearch.Game):
                     moves.append((r + 1, c - 1))
 
             # Check below right
-            if c + 1 >= 0:
+            if c + 1 <= 7:
                 if state[r + 1][c + 1] == '.':
                     moves.append((r + 1, c + 1))
 
         return moves
 
     def fox_wins(self, state):
-        r, c = self.get_fox(self, state)
+        r, c = self.get_fox(state)
 
         if r == 0:
             if c == 1 or c == 3 or c == 5 or c == 7:
@@ -153,7 +150,7 @@ class FoxAndHounds(gameSearch.Game):
 
     def get_hounds_moves(self, state):
         moves = []
-        hounds = self.get_hounds(self, state)
+        hounds = self.get_hounds(state)
 
         for hound in range(4):
             r, c = hounds[hound]
@@ -167,14 +164,14 @@ class FoxAndHounds(gameSearch.Game):
                         moves.append((hound, r + 1, c - 1))
 
                 # Check below right
-                if c + 1 >= 0:
+                if c + 1 <= 7:
                     if state[r + 1][c + 1] == '.':
                         moves.append((hound, r + 1, c + 1))
 
         return moves
 
     def hounds_win(self, state):
-        fox_moves = self.get_fox_moves(self, state)
+        fox_moves = self.get_fox_moves(state)
 
         if len(fox_moves) == 0:
             return True
@@ -189,60 +186,75 @@ instances = []
 # Include additional instances one move from the end,
 # 2-4 moves from the end, etc.
 
-instances += [RenameThisGame('?')]
-instances[-1].label = 'CopyPasta, tsk, tsk!'
+instances += [FoxAndHounds((
+                  '...f.h.h',
+                  '....h...',
+                  '........',
+                  '........',
+                  '........',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins'
 
-instances += [RenameThisGame('?')]
-instances[-1].label = 'CopyPasta, tsk, tsk!'
+instances += [FoxAndHounds((
+                  '.....h.h',
+                  '..f.h...',
+                  '........',
+                  '........',
+                  '........',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in 1 ply'
 
-instances += [RenameThisGame('?')]
-instances[-1].label = 'CopyPasta, tsk, tsk!'
-
-instances += [RenameThisGame('?')]
-instances[-1].label = 'CopyPasta, tsk, tsk!'
+# instances += [FoxAndHounds(('XO.','.OX','.OX',))]
+# instances[-1].label = 'O wins down center'
 
 # Change to your name
-name = 'Aardvark, Aaron'
+name = 'Fannin, Evan'
 
 games = {}
 
 games['easy'] = {
     'evaluation' : 'table',
-    'instances' : instances[0:1],
+    'instances' : instances[0:2],
     'players' : [   # Compare search methods on simple instances.
         gameSearch.MiniMax(),
         gameSearch.AlphaBeta(),
     ]
 }
 
-games['hardest'] = {
-    'evaluation' : 'table',
-    'instances' : instances[-2:],
-    'players' : [   # Only use the best method on hard instances.
-        gameSearch.AlphaBeta(6),
-    ]
-}
+# games['hardest'] = {
+#     'evaluation' : 'table',
+#     'instances' : [],
+#     'players' : [   # Only use the best method on hard instances.
+#         gameSearch.AlphaBeta(6),
+#     ]
+# }
 
-games['fun'] = {
-    'evaluation' : 'play',
-    'instance' : RenameThisGame(),
-    'players' : [   # uncomment two  Players
-        gameSearch.Query('Aaron'),
-        gameSearch.Random(),            # Add seed in ()'s for a repeatable game
-        # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
-        # gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
-        # gameSearch.Query('Aamy'),
-    ]
-}
+# games['fun'] = {
+#     'evaluation' : 'play',
+#     'instance' : RenameThisGame(),
+#     'players' : [   # uncomment two  Players
+#         gameSearch.Query('Aaron'),
+#         gameSearch.Random(),            # Add seed in ()'s for a repeatable game
+#         # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
+#         # gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
+#         # gameSearch.Query('Aamy'),
+#     ]
+# }
 
 ###################################################
 
 # Modules in the examples folder
 # Import them for testing only.
 #
-from examples import aimaTTT
-name = aimaTTT.name
-games = aimaTTT.games
+# from examples import aimaTTT
+# name = aimaTTT.name
+# games = aimaTTT.games
 #
 # from examples import tictactoe
 # name = tictactoe.name
