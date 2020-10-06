@@ -6,7 +6,7 @@ class FoxAndHounds(gameSearch.Game):
     Include a reference to the exact rules.
     '''
 
-    fox_turn = False  # Fox moves first, this is flipped at the start of actions
+    fox_turn = True  # Fox moves first
 
     emptyState = (  # The setup at the beginning of a full game.
                   '.h.h.h.h',
@@ -26,17 +26,16 @@ class FoxAndHounds(gameSearch.Game):
             self.initial = initial
 
     def actions(self, state):
-        self.fox_turn = not self.fox_turn
-
         if self.fox_turn:
             return self.get_fox_moves(state)
         else:  # It's the hounds' turn
             return self.get_hounds_moves(state)
 
     def result(self, state, move):
+        print(move)
         board = [[c for c in row]
                  for row in state]
-        player = self.to_move
+        player = self.fox_turn
 
         if player:
             r0, c0 = self.get_fox(state)
