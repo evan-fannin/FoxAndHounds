@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 import traceback
 from inspect import signature
-from math import inf #, log, log2, trunc
+from math import inf, log, log2, trunc
 import importlib
 import sys
 import re
@@ -72,6 +72,7 @@ def newScores():
     for pair in rubric:
         label = pair[0]
         s[label] = 0
+    # s['heuristic'] = rPoints['heuristic']
     return s
 
 def assignFullCredit(sd, key):
@@ -98,8 +99,8 @@ plyMap = {
     6: ['6plys'],
     7: ['6plys'],
 }
-plyMap.update({n: '8plys' for n in range(8,12)})
-plyMap.update({n: '12plys' for n in range(12,16)})
+plyMap.update({n: ['8plys'] for n in range(8,12)})
+plyMap.update({n: ['12plys'] for n in range(12,16)})
 
 def assignDepthCredit(score, depth, p2uple):
     if depth not in plyMap:
@@ -151,16 +152,45 @@ def gradeGame(player, igame, depth, utility):
         outcome = 'tie'
     p2uple = (p2move, outcome)
     assignDepthCredit(score, depth, p2uple)
+    # if searcher in standardSearchList:
+    #     score['allMethods'] = partialCredit(
+    #         'allMethods', 0, len(standardSearchList), 1)
+    # admissible, consistent = aAndC(Game, goalNode)
+    # sum = admissible + consistent
+    # score['heuristic'] = partialCredit('heuristic', 0, 2, sum)
+    # if depth == 2:
+    #     assignFullCredit(score, '2actions')
+    # elif depth > 2:
+    #     logDepth = trunc(log2(depth))
+    #     minLDI = rNames.index('4-7actions')
+    #     maxLDI = rNames.index('64+actions')
+    #     LDIndex = minLDI + logDepth - 2
+    #     LDIndex = max(minLDI, min(maxLDI, LDIndex))
+    #     lBName = rNames[LDIndex]
+    #     assignFullCredit(score, lBName)
+    # breadth = Game.states
+    # logBreadth = trunc(log2(breadth)/2)
+    # minLBI = rNames.index('1-3nodes')
+    # maxLBI = rNames.index('65536+nodes')
+    # LBIndex = minLBI + logBreadth - 1
+    # LBIndex = max(minLBI, min(maxLBI, LBIndex))
+    # lBName = rNames[LBIndex]
+    # assignFullCredit(score, lBName)
+    #
     info['score'] = score
     return info
 
-def compare_searchers(games, header, players=[]):
+def compare_searchers(games, header,
+                      # searchers=[]
+                      players=[]
+                      ):
     best = {}
     bestNode = {}
     gradeInfo = {}
     for g in games:
         best[g.label] = -inf
         bestNode[g.label] = None
+    # def do(searcher, game):
     def do(player, game):
         nonlocal best, bestNode, gradeInfo
         igame = gameSearch.InstrumentedGame(game)
@@ -168,6 +198,7 @@ def compare_searchers(games, header, players=[]):
             ipLabel = igame.label
             if not ipLabel in gradeInfo:
                 gradeInfo[ipLabel] = {}
+            # utility, bestMoves = searcher(igame)
             utility, bestMoves = player.search(igame)
             depth = len(bestMoves)
             game.predicted_utility = utility
@@ -176,9 +207,12 @@ def compare_searchers(games, header, players=[]):
                 nextMove = bestMoves[0]
             else:
                 nextMove = None
+            # gradeInfo[ipLabel][searcher] = \
+            #     gradeGame(searcher, igame, utility)
             gradeInfo[ipLabel][player] = \
                 gradeGame(player, igame, depth, utility)
             initial = igame.game.initial
+            # utility = igame.utility(initial)
             if utility > best[ipLabel]:
                 best[ipLabel] = utility
                 bestNode[ipLabel] = initial
@@ -191,12 +225,30 @@ def compare_searchers(games, header, players=[]):
             print(e)
             sys.exit(1)
 
+    # table = [[utils.name(s)] + [do(s, p) for p in games]
+    #          for s in searchers]
     table = [[str(p)] + [do(p, g) for g in games]
              for p in players]
     print_table(table, header)
     print('----------------------------------------')
     for g in games:
+        # bestPath = []
+        # node = bestNode[g.label]
+        # while node != None:
+        #     bestPath.append(node.state)
+        #     node = node.parent
         summary = 'Best Moves for %s: %s' % (g.label, g.bestMoves)
+        # ppFun = getattr(p, "prettyPrint", None)
+        # if ppFun == None:
+        #     ppFun = str
+        # ppSep = ' '
+        # pathLength = len(bestPath)
+        # if pathLength > 0:
+        #     stateLength = len(ppFun(bestPath[0]))
+        #     if pathLength * stateLength > 100:
+        #         ppSep = "\n"
+        # for state in reversed(bestPath):
+        #     summary += ppSep + ppFun(state)
         print(summary)
     print('----------------------------------------')
     return gradeInfo
@@ -212,8 +264,7 @@ def wellFormed(game):
     gasig = signature(game.actions)
     if len(gasig.parameters) != 1:
         print('in Game "' + game.label + '",')
-        print('  actions(...) has the wrong number of parameters.'
-        + '  Define it as:')
+        print('  actions(...) has the wrong number of parameters.  Define it as:')
         print('  def actions(self, state):')
         return False
 
@@ -223,8 +274,7 @@ def wellFormed(game):
     grsig = signature(game.result)
     if len(grsig.parameters) != 2:
         print('in Game "' + game.label + '",')
-        print('  result(...) has the wrong number of parameters.'
-        + '  Define it as:')
+        print('  result(...) has the wrong number of parameters.  Define it as:')
         print('  def result(self, state, action):')
         return False
 
@@ -234,8 +284,7 @@ def wellFormed(game):
     gusig = signature(game.utility)
     if len(gusig.parameters) != 2:
         print('in Game "' + game.label + '",')
-        print('  utility(...) has the wrong number of parameters.'
-        + '  Define it as:')
+        print('  utility(...) has the wrong number of parameters.  Define it as:')
         print('  def utility(self, state, player):')
         return False
 
@@ -245,8 +294,7 @@ def wellFormed(game):
     gtsig = signature(game.terminal_test)
     if len(gtsig.parameters) != 1:
         print('in Game "' + game.label + '",')
-        print('  terminal_test(...) has the wrong number of parameters.'
-        + '  Define it as:')
+        print('  terminal_test(...) has the wrong number of parameters.  Define it as:')
         print('  def terminal_test(self, state):')
         return False
     return True
@@ -305,6 +353,7 @@ def getPlayers():
 
 def playGame(batch):
     instance = batch['instance']
+    # players = batch['players']
     while True:
         instance.display(instance.initial)
         players = getPlayers()
@@ -340,7 +389,7 @@ name = mod.name
 games = {}
 
 for batch in mod.games:
-    messages = ['Game instances for %s: ' % (batch),
+    messages = ['      Searches for %s: ' % (batch),
                 'Search methods for %s: ' % (batch)]
     try:
         evaluation = mod.games[batch]['evaluation']
@@ -373,10 +422,12 @@ for batch in mod.games:
         if not skipErrors:
             sys.exit(1)
     try:
-        # if 'players' in mod.games[batch]
+        # searchMethods[batch] = mod.games[batch]['methods']
+        # methodNames = [m.__name__ for m in searchMethods[batch]]
+        # if len(searchMethods[batch]) > 0:
+        #     messages[1] += '%s' % (methodNames)
         players[batch] = mod.games[batch]['players']
-        playerLabels = [str(o) for o in players[batch]]
-        messages[1] += '%s' % (playerLabels)
+        messages[1] += str(players[batch])
     except:
         print('games["%s"]["players"] are missing or defective.'
               % batch)
@@ -390,9 +441,14 @@ for batch in mod.games:
     if not batch in games.keys():
         continue
     scores[batch] = []
+    # searchList = []
+    # if batch in searchMethods:
+    #     searchList += searchMethods[batch]
     playerList = []
     if batch in players:
         playerList += players[batch]
+        # for s in searchMethods[student]:
+        #     searchList.append(s)
     try:
         glist = games[batch]
         hlist = [[batch], ['']]
@@ -411,6 +467,7 @@ for batch in mod.games:
         gradeInfo[batch] = compare_searchers(
             games=glist,
             header=hlist,
+            # searchers=searchList
             players=playerList
         )
     except:

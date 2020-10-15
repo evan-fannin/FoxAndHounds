@@ -25,9 +25,13 @@ class FoxAndHounds(gameSearch.Game):
 
     def actions(self, state):
         if state[0][0] == '1':
-            return self.get_fox_moves(state)
+            fox_moves = self.get_fox_moves(state)
+            return fox_moves
+            # return self.get_fox_moves(state)
         else:  # It's the hounds' turn
-            return self.get_hounds_moves(state)
+            hounds_moves = self.get_hounds_moves(state)
+            return hounds_moves
+            # return self.get_hounds_moves(state)
 
     def result(self, state, move):
         board = [[c for c in row]
@@ -38,7 +42,7 @@ class FoxAndHounds(gameSearch.Game):
             r1, c1 = move
             board[r0][c0] = '.'
             board[r1][c1] = 'f'
-            board[0][0] == '0'
+            board[0][0] = '0'
             new_state = tuple([''.join(row)
                               for row in board])
             return new_state
@@ -56,18 +60,48 @@ class FoxAndHounds(gameSearch.Game):
             return new_state
 
     def utility(self, state, player):
-        fox_utility = self.fox_utility(state)
-        if player == 'f':
-            return fox_utility
-        else:
-            return -fox_utility
+        total_utility = 0
+        distance_utility = 7 - self.distance_utility(state)
+        number_of_moves_utility = (4 - self.number_of_moves_utility(state))
+        winning_utility = self.winning_utility(state)
 
-    def fox_utility(self, state):
+        if player == 'f':
+            total_utility += max(0, distance_utility)
+            total_utility -= number_of_moves_utility
+            total_utility += winning_utility
+            return total_utility
+
+        else:
+            total_utility -= max(0, distance_utility)
+            total_utility += (4 * number_of_moves_utility)
+            total_utility -= winning_utility
+            return total_utility
+
+    def winning_utility(self, state):
         if self.fox_wins(state):
-            return 1
+            return 100
         if self.hounds_win(state):
-            return -1
+            return -100
         return 0
+
+    def distance_utility(self, state):
+        r, c = self.get_fox(state)
+        distances = []
+        distances.append(self.get_distance(r, c, 0, 1))
+        distances.append(self.get_distance(r, c, 0, 3))
+        distances.append(self.get_distance(r, c, 0, 5))
+        distances.append(self.get_distance(r, c, 0, 7))
+        return min(distances)
+
+    def get_distance(self, r, c, r1, c1):
+        r_diff = r1 - r
+        c_diff = abs(c1 - c)
+        distance = (r_diff + c_diff) / 2
+        return distance
+
+    def number_of_moves_utility(self, state):
+        fox_moves = self.get_fox_moves(state)
+        return len(fox_moves)
 
     def terminal_test(self, state):
         fox_wins = self.fox_wins(state)
@@ -228,6 +262,54 @@ instances += [FoxAndHounds((
 instances[-1].label = 'Fox wins in 2 ply'
 
 instances += [FoxAndHounds((
+                  '1....h.h',
+                  '....h...',
+                  '.f......',
+                  '........',
+                  '........',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in 3 ply'
+
+instances += [FoxAndHounds((
+                  '0....h.h',
+                  '........',
+                  '.f......',
+                  '........',
+                  '.....h..',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in 4 ply'
+
+instances += [FoxAndHounds((
+                  '0....h.h',
+                  '........',
+                  '.......f',
+                  '........',
+                  '.....h..',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in 6 ply'
+
+instances += [FoxAndHounds((
+                  '0....h.h',
+                  '........',
+                  '........',
+                  '....h...',
+                  '...f....',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in ? ply'
+
+instances += [FoxAndHounds((
                   '0....h.h',
                   '........',
                   '.h......',
@@ -252,7 +334,7 @@ instances += [FoxAndHounds((
 instances[-1].label = 'Hounds win in 1 ply'
 
 instances += [FoxAndHounds((
-                  '0......h',
+                  '1......h',
                   '........',
                   '........',
                   '........',
@@ -263,7 +345,28 @@ instances += [FoxAndHounds((
                  ))]
 instances[-1].label = 'Hounds win in 2 ply'
 
-instances += [FoxAndHounds()]
+instances += [FoxAndHounds((
+                  '0......h',
+                  '........',
+                  '........',
+                  '........',
+                  '...h....',
+                  'h.......',
+                  '.f......',
+                  '..h.....'
+                 ))]
+instances[-1].label = 'Hounds win in 3 ply'
+
+instances += [FoxAndHounds((
+                  '1h.h.h.h',
+                  '........',
+                  '........',
+                  '........',
+                  '........',
+                  '........',
+                  '........',
+                  'f.......'
+                 ))]
 instances[-1].label = 'Full Game'
 
 # instances += [FoxAndHounds(('XO.','.OX','.OX',))]
@@ -276,7 +379,7 @@ games = {}
 
 games['easy'] = {
     'evaluation' : 'table',
-    'instances' : instances[0:6],
+    'instances' : instances[0:11],
     'players' : [   # Compare search methods on simple instances.
         gameSearch.MiniMax(),
         gameSearch.AlphaBeta(),
