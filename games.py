@@ -61,20 +61,21 @@ class FoxAndHounds(gameSearch.Game):
 
     def utility(self, state, player):
         total_utility = 0
-        distance_utility = 7 - self.distance_utility(state)
-        number_of_moves_utility = (4 - self.number_of_moves_utility(state))
+        distance_from_goal_utility = 7 - self.distance_from_goal_utility(state)
+        number_of_moves_utility = 10 * (4 - self.number_of_moves_utility(state))
         winning_utility = self.winning_utility(state)
+        total_distance = self.distance_from_fox_utility(state)
 
         if player == 'f':
-            total_utility += max(0, distance_utility)
+            total_utility += max(0, distance_from_goal_utility)
             total_utility -= number_of_moves_utility
             total_utility += winning_utility
             return total_utility
 
         else:
-            total_utility -= max(0, distance_utility)
-            total_utility += (4 * number_of_moves_utility)
-            total_utility -= winning_utility
+            total_utility -= 5 * max(0, distance_from_goal_utility)
+            # total_utility += 10 * (4 * number_of_moves_utility)
+            total_utility -= 100 * winning_utility
             return total_utility
 
     def winning_utility(self, state):
@@ -84,7 +85,7 @@ class FoxAndHounds(gameSearch.Game):
             return -100
         return 0
 
-    def distance_utility(self, state):
+    def distance_from_goal_utility(self, state):
         r, c = self.get_fox(state)
         distances = []
         distances.append(self.get_distance(r, c, 0, 1))
@@ -92,6 +93,15 @@ class FoxAndHounds(gameSearch.Game):
         distances.append(self.get_distance(r, c, 0, 5))
         distances.append(self.get_distance(r, c, 0, 7))
         return min(distances)
+
+    def distance_from_fox_utility(self, state):
+        r, c = self.get_fox(state)
+        hounds = self.get_hounds(state)
+        total_distance = 0
+        for i in hounds:
+            r2, c2, = i
+            total_distance += self.get_distance(r, c, r2, c2)
+        return total_distance
 
     def get_distance(self, r, c, r1, c1):
         r_diff = r1 - r
@@ -358,6 +368,30 @@ instances += [FoxAndHounds((
 instances[-1].label = 'Hounds win in 3 ply'
 
 instances += [FoxAndHounds((
+                  '0......h',
+                  '........',
+                  '..h.....',
+                  '....h...',
+                  '...f....',
+                  '..h.....',
+                  '........',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in ? ply'
+
+instances += [FoxAndHounds((
+                  '0......h',
+                  '........',
+                  '..h.....',
+                  '....h...',
+                  '........',
+                  '..h.....',
+                  '.......f',
+                  '........'
+                 ))]
+instances[-1].label = 'Fox wins in ? ply'
+
+instances += [FoxAndHounds((
                   '1h.h.h.h',
                   '........',
                   '........',
@@ -377,34 +411,34 @@ name = 'Fannin, Evan'
 
 games = {}
 
-games['easy'] = {
-    'evaluation' : 'table',
-    'instances' : instances[0:11],
-    'players' : [   # Compare search methods on simple instances.
-        gameSearch.MiniMax(),
-        gameSearch.AlphaBeta(),
-    ]
-}
-
-games['hardest'] = {
-    'evaluation' : 'table',
-    'instances' : [instances[-1]],
-    'players' : [   # Only use the best method on hard instances.
-        gameSearch.AlphaBeta(6),
-    ]
-}
-
-# games['fun'] = {
-#     'evaluation' : 'play',
-#     'instance' : FoxAndHounds(),
-#     'players' : [   # uncomment two  Players
-#         gameSearch.Query('Evan'),
-#         # gameSearch.Random(),            # Add seed in ()'s for a repeatable game
-#         # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
-#         gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
-#         # gameSearch.Query('Aamy'),
+# games['easy'] = {
+#     'evaluation' : 'table',
+#     'instances' : instances[0:11],
+#     'players' : [   # Compare search methods on simple instances.
+#         gameSearch.MiniMax(),
+#         gameSearch.AlphaBeta(),
 #     ]
 # }
+
+# games['hardest'] = {
+#     'evaluation' : 'table',
+#     'instances' : [instances[-1]],
+#     'players' : [   # Only use the best method on hard instances.
+#         gameSearch.AlphaBeta(6),
+#     ]
+# }
+
+games['fun'] = {
+    'evaluation' : 'play',
+    'instance' : FoxAndHounds(),
+    'players' : [   # uncomment two  Players
+        gameSearch.Query('Evan'),
+        # gameSearch.Random(),            # Add seed in ()'s for a repeatable game
+        # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
+        gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
+        # gameSearch.Query('Aamy'),
+    ]
+}
 
 ###################################################
 

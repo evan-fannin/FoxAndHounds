@@ -310,13 +310,19 @@ def getPlayers():
         ]:
             print(line)
 
-    def getPlayer(prompt):
+    def getPlayer(prompt, human):
         commands = {utils.name(s).lower() : utils.name(s)
                     for s in gameSearch.Player.__subclasses__()}
         commands.update({'quit': 'Quit', 'help':'Help'})
         parens = r'\([^(]*\)'
+
+        if human == True:
+            s = 'Query("Human")'
+        else:
+            s = 'AlphaBeta(8)'
+
         while True:
-            s = input(prompt)
+            # s = input(prompt)
             c = re.sub(parens,'',s)
             # s = s[0].upper() + s[1:].lower()
             if c.lower() not in commands:
@@ -342,14 +348,28 @@ def getPlayers():
                 playerHelp()
 
     print('Does anyone want to play?')
-    print('Enter players, "help", or "quit":')
-    p1 = getPlayer('Enter player 1: ')
-    if p1 == None:
-        return None
-    p2 = getPlayer('Enter player 2: ')
-    if p2 == None:
-        return None
-    return (p1, p2)
+    # print('Enter players, "help", or "quit":')
+    choice = input("Type 'fox' to play fox, 'hounds' to play hounds, or 'observe'"
+                   " to watch a match:  ")
+    if choice == 'fox':
+        p1 = getPlayer("", True)
+        p2 = getPlayer('', False)
+        return p1, p2
+
+    if choice == 'hounds':
+        p1 = getPlayer("", False)
+        p2 = getPlayer('', True)
+        return p1, p2
+
+    if choice == 'observe':
+        p1 = getPlayer("", False)
+        p2 = getPlayer('', False)
+        return p1, p2
+
+    print("Bad input.")
+    print()
+    print()
+    getPlayers()
 
 def playGame(batch):
     instance = batch['instance']

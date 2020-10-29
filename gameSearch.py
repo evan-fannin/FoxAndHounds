@@ -131,8 +131,8 @@ class Query(Player):
         self.helped = False
 
     def help(self):
-        print('To print the current state, enter "board".')
-        print('For a list of legal moves, enter "moves".')
+        # print('To print the current state, enter "board".')
+        # print('For a list of legal moves, enter "moves".')
         self.helped = True
 
     def move(self, state):
@@ -142,6 +142,11 @@ class Query(Player):
         while True:
             legalMoves = self.game.actions(state)
             while True:
+                print()
+                self.game.display(state)
+                print()
+                print('Moves must be entered exactly as shown.')
+                print('Legal moves are: %s' % str(legalMoves))
                 move_string = input('Your move, %s: ' % self.name)
                 if move_string == 'board':
                     self.game.display(state)
@@ -205,6 +210,7 @@ class AlphaBeta(Player):
         self.eval = eval_fn
 
     def move(self, state):
+        self.game.display(state)
         self.checkGame()
         _ignore_, vpath = \
             alphabeta_search(self.game, state, self.depth,
