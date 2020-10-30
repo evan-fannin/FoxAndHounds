@@ -19,9 +19,29 @@ class FoxAndHounds(gameSearch.Game):
 
     def __init__(self, initial=None):
         if initial == None:
-            self.initial = self.emptyState
-        else:
-            self.initial = initial
+            # choose_start = input('Choose a starting point? ("yes" / "no"):  ')
+            choose_start = 'no'
+            if choose_start == 'yes':
+                initial = input('''Enter initial game board as a string tuple.\nIt\'s your fault if you enter it wrong and the game messes up. We only take so much responsibility.
+                Here\'s an example:
+                (
+                '0......h',
+                '........',
+                '..h.....',
+                '....h...',
+                '........',
+                '..h.....',
+                '.......f',
+                '........',
+                )
+                :''')
+
+                self.initial = initial
+            else:
+                # print('You either typed "no" or gibberish.\n'
+                #       'Here we go from the start!')
+                self.initial = self.emptyState
+
 
     def actions(self, state):
         if state[0][0] == '1':
