@@ -1,4 +1,5 @@
 import gameSearch
+import networkx as nx
 
 class FoxAndHounds(gameSearch.Game):
     '''
@@ -133,6 +134,9 @@ class FoxAndHounds(gameSearch.Game):
         fox_moves = self.get_fox_moves(state)
         return len(fox_moves)
 
+    def paths_to_goal_utility(self, state):
+
+
     def terminal_test(self, state):
         fox_wins = self.fox_wins(state)
         hounds_win = self.hounds_win(state)
@@ -246,6 +250,46 @@ class FoxAndHounds(gameSearch.Game):
         for row in state:
             chars = [c for c in row]
             print('    %s' % ' '.join(chars))
+
+    def create_graph(self):
+        g = nx.Graph()
+        edges = [((0, 1), (1, 0)), ((0, 1), (1, 2)),
+                 ((0, 3), (1, 2)), ((0, 3), (1, 4)),
+                 ((0, 5), (1, 4)), ((0, 5), (1, 6)),
+                 ((0, 7), (1, 6)),
+
+                 ((1, 0), (2, 1)),
+                 ((1, 2), (2, 1)), ((1, 2), (2, 3)),
+                 ((1, 4), (2, 3)), ((1, 4), (2, 5)),
+                 ((1, 6), (2, 5)), ((1, 6), (2, 7)),
+
+                 ((2, 1), (3, 0)), ((2, 1), (3, 2)),
+                 ((2, 3), (3, 2)), ((2, 3), (3, 4)),
+                 ((2, 5), (3, 4)), ((2, 5), (3, 6)),
+
+                 ((3, 0), (4, 1)),
+                 ((3, 2), (4, 1)), ((3, 2), (4, 3)),
+                 ((3, 4), (4, 3)), ((3, 4), (4, 5)),
+                 ((3, 6), (4, 5)), ((3, 6), (4, 7)),
+
+                 ((4, 1), (5, 0)), ((4, 1), (5, 2)),
+                 ((4, 3), (5, 2)), ((4, 3), (5, 4)),
+                 ((4, 5), (5, 4)), ((4, 5), (5, 6)),
+                 ((4, 7), (5, 6)),
+
+                 ((5, 0), (6, 1)),
+                 ((5, 2), (6, 1)), ((5, 2), (6, 3)),
+                 ((5, 4), (6, 3)), ((5, 4), (6, 5)),
+                 ((5, 6), (6, 5)), ((5, 6), (6, 7)),
+
+                 ((6, 1), (7, 0)), ((6, 1), (7, 2)),
+                 ((6, 3), (7, 2)), ((6, 3), (7, 4)),
+                 ((6, 5), (7, 4)), ((6, 5), (7, 6)),
+                 ((6, 7), (7, 6))]
+        g.add_edges_from(edges)
+
+        return g
+
 
 
 instances = []
@@ -448,17 +492,17 @@ games = {}
 #     ]
 # }
 
-games['fun'] = {
-    'evaluation' : 'play',
-    'instance' : FoxAndHounds(),
-    'players' : [   # uncomment two  Players
-        gameSearch.Query('Evan'),
-        # gameSearch.Random(),            # Add seed in ()'s for a repeatable game
-        # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
-        gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
-        # gameSearch.Query('Aamy'),
-    ]
-}
+# games['fun'] = {
+#     'evaluation' : 'play',
+#     'instance' : FoxAndHounds(),
+#     'players' : [   # uncomment two  Players
+#         gameSearch.Query('Evan'),
+#         # gameSearch.Random(),            # Add seed in ()'s for a repeatable game
+#         # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
+#         gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
+#         # gameSearch.Query('Aamy'),
+#     ]
+# }
 
 ###################################################
 
