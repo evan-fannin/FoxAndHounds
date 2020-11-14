@@ -134,8 +134,35 @@ class FoxAndHounds(gameSearch.Game):
         fox_moves = self.get_fox_moves(state)
         return len(fox_moves)
 
-    def paths_to_goal_utility(self, state):
+    def path_to_goal_utility(self, state):
+        g = self.create_graph()
+        hounds = self.get_hounds(state)
+        for hound in hounds:
+            g.remove_node(hound)
 
+        goals = []
+
+        if g.has_node((0, 1)):
+            goals.append((0, 1))
+        if g.has_node((0, 3)):
+            goals.append((0, 3))
+        if g.has_node((0, 5)):
+            goals.append((0, 5))
+        if g.has_node((0, 7)):
+            goals.append((0, 7))
+
+        fox = self.get_fox(state)
+
+        distances = []
+
+        for goal in goals:
+            if nx.has_path(g, fox, goal):
+                distances.append(nx.dijkstra_path_length(g, fox, goal))
+
+        if len(distances) == 0:
+            return -1
+
+        return min(distances)
 
     def terminal_test(self, state):
         fox_wins = self.fox_wins(state)

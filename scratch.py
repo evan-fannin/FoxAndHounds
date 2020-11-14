@@ -36,6 +36,12 @@ edges = [((0, 1), (1, 0)), ((0, 1), (1, 2)),
          ((6, 7), (7, 6))]
 g.add_edges_from(edges)
 
-print(g.degree((6, 1)))
-g.remove_node((7, 0))
-print(g.degree((6, 1)))
+def get_hound():
+    return 7, 0
+
+print(nx.dijkstra_path_length(g, (6, 1), (7, 0)))
+node = get_hound()
+print(nx.has_path(g, (6, 1), node))
+print(g.has_node(node))
+g.remove_node(node)
+print(g.has_node(node))
