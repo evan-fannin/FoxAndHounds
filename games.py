@@ -82,21 +82,39 @@ class FoxAndHounds(gameSearch.Game):
 
     def utility(self, state, player):
         total_utility = 0
-        distance_from_goal_utility = 7 - self.distance_from_goal_utility(state)
+        # distance_from_goal_utility = 7 - self.distance_from_goal_utility(state)
         number_of_moves_utility = 10 * (4 - self.number_of_moves_utility(state))
         winning_utility = self.winning_utility(state)
-        total_distance = self.distance_from_fox_utility(state)
+        # total_distance = self.distance_from_fox_utility(state)
+
+        path_length_utility = self.path_to_goal_utility(state)
+        if path_length_utility == -1:
+            path_length_utility = 0
+        else:
+            path_length_utility = 100 - path_length_utility
 
         if player == 'f':
-            total_utility += max(0, distance_from_goal_utility)
-            total_utility -= number_of_moves_utility
-            total_utility += winning_utility
+
+            if (path_length_utility == 0):
+                # total_utility += max(0, distance_from_goal_utility)
+                total_utility -= number_of_moves_utility
+                total_utility += winning_utility
+            else :
+                total_utility += path_length_utility
+                total_utility += winning_utility
+
             return total_utility
 
-        else:
-            total_utility -= 5 * max(0, distance_from_goal_utility)
-            # total_utility += 10 * (4 * number_of_moves_utility)
-            total_utility -= 100 * winning_utility
+        else: # Player is hounds
+
+            if (path_length_utility == 0):
+                total_utility -= 100 * winning_utility
+                total_utility += 10 * (4 * number_of_moves_utility)
+                # total_utility -= 5 * max(0, distance_from_goal_utility)
+            else:
+                total_utility -= path_length_utility
+                total_utility -= winning_utility
+
             return total_utility
 
     def winning_utility(self, state):
@@ -519,17 +537,17 @@ games = {}
 #     ]
 # }
 
-# games['fun'] = {
-#     'evaluation' : 'play',
-#     'instance' : FoxAndHounds(),
-#     'players' : [   # uncomment two  Players
-#         gameSearch.Query('Evan'),
-#         # gameSearch.Random(),            # Add seed in ()'s for a repeatable game
-#         # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
-#         gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
-#         # gameSearch.Query('Aamy'),
-#     ]
-# }
+games['fun'] = {
+    'evaluation' : 'play',
+    'instance' : FoxAndHounds(),
+    'players' : [   # uncomment two  Players
+        gameSearch.Query('Evan'),
+        # gameSearch.Random(),            # Add seed in ()'s for a repeatable game
+        # gameSearch.MiniMax(),         # Add horizon in ()'s if != 4
+        gameSearch.AlphaBeta(),       # Add horizon in ()'s if != 4
+        # gameSearch.Query('Aamy'),
+    ]
+}
 
 ###################################################
 
