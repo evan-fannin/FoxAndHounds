@@ -3,11 +3,8 @@ Hello there.
 This is a guide to running this project.
 
 First and foremost, you're going to need a virtual environment! Aside from the dependencies used for
-our original homework project, you're going to need the package networkx.
-The easiest way to get everything is to use pipenv. If you don't have it, install pipenv.
-Then set up a virtual environment in PyCharm, selecting the pipenv environment option.
-If PyCharm doesn't install dependencies from this project's Pipfile automatically,
-just type "pipenv install" in the PyCharm terminal. Then you'll be good to go!
+our original homework project, you're going to need the package networkx. Simply run "pip install networkx" or,
+if you're using pipenv, "pipenv install networkx". Then you're good to go!
 
 If you would like to see the results of several different setups that were already played through, simply peruse
 through the 8 games already logged in logfile.txt.
