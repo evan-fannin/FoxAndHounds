@@ -42,6 +42,8 @@ class FoxAndHounds(gameSearch.Game):
                 # print('You either typed "no" or gibberish.\n'
                 #       'Here we go from the start!')
                 self.initial = self.emptyState
+        else:
+            self.initial = initial
 
 
     def actions(self, state):
@@ -540,6 +542,16 @@ games = {}
 games['fun'] = {
     'evaluation' : 'play',
     'instance' : FoxAndHounds(),
+    # 'instance': FoxAndHounds((
+    #               '1h.h.h.h',
+    #               '........',
+    #               '........',
+    #               '........',
+    #               '........',
+    #               '........',
+    #               '........',
+    #               'f.......'
+    #              )),
     'players' : [   # uncomment two  Players
         gameSearch.Query('Evan'),
         # gameSearch.Random(),            # Add seed in ()'s for a repeatable game

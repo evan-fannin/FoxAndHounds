@@ -374,7 +374,8 @@ def getPlayers():
 def playGame(batch):
     instance = batch['instance']
     # players = batch['players']
-    while True:
+    playing = True
+    while playing:
         instance.display(instance.initial)
         players = getPlayers()
         if players == None:
@@ -390,6 +391,7 @@ def playGame(batch):
             outcome = 'tied'
         print('%s %s against %s, util = %f'
               % (players[0], outcome, players[1], util))
+        playing = False
 
 modName = 'games'
 
@@ -495,35 +497,35 @@ for batch in mod.games:
         sys.exit(1)
 
 
-allScores = newScores()
-maxScores = {}
-for batch in gradeInfo:
-    print('Scores for: %s' % batch)
-    maxScores[batch] = {}
-    for pLabel in gradeInfo[batch]:
-        table = []
-        maxScores[batch][pLabel] = newScores()
-        for searcher in gradeInfo[batch][pLabel]:
-            sLabel = utils.name(searcher)
-            info = gradeInfo[batch][pLabel][searcher]
-            scoreSet = info['score']
-            table.append(['%s, %s:' % (sLabel, pLabel),
-                          scoreList(scoreSet)])
-            for label in scoreSet:
-                accumulator = accuMethods[label]
-                maxScores[batch][pLabel][label] = accumulator(
-                    maxScores[batch][pLabel][label], scoreSet[label])
-        if len(table) > 1:
-            table.append(['%s summary:' % (pLabel),
-                          scoreList(maxScores[batch][pLabel])])
-        print_table(table)
-        if len(table) > 1:
-            print()
-        for label in allScores:
-            allScores[label] \
-                = max(allScores[label], maxScores[batch][pLabel][label])
-
-realName = mod.name
-sl = [int(round(x)) for x in scoreList(allScores)]
-print(realName, 'summary:', str(sl))
-print(realName, '  total:', str(min(100, sum(sl))))
+# allScores = newScores()
+# maxScores = {}
+# for batch in gradeInfo:
+#     print('Scores for: %s' % batch)
+#     maxScores[batch] = {}
+#     for pLabel in gradeInfo[batch]:
+#         table = []
+#         maxScores[batch][pLabel] = newScores()
+#         for searcher in gradeInfo[batch][pLabel]:
+#             sLabel = utils.name(searcher)
+#             info = gradeInfo[batch][pLabel][searcher]
+#             scoreSet = info['score']
+#             table.append(['%s, %s:' % (sLabel, pLabel),
+#                           scoreList(scoreSet)])
+#             for label in scoreSet:
+#                 accumulator = accuMethods[label]
+#                 maxScores[batch][pLabel][label] = accumulator(
+#                     maxScores[batch][pLabel][label], scoreSet[label])
+#         if len(table) > 1:
+#             table.append(['%s summary:' % (pLabel),
+#                           scoreList(maxScores[batch][pLabel])])
+#         print_table(table)
+#         if len(table) > 1:
+#             print()
+#         for label in allScores:
+#             allScores[label] \
+#                 = max(allScores[label], maxScores[batch][pLabel][label])
+#
+# realName = mod.name
+# sl = [int(round(x)) for x in scoreList(allScores)]
+# print(realName, 'summary:', str(sl))
+# print(realName, '  total:', str(min(100, sum(sl))))
